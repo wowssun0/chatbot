@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>독감 예방 백신 챗봇</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#667085;--brand:#0b57d0;--ring:#d0d5dd;--bot:#f2f4f7}
+    *{box-sizing:border-box}html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+    .shell{width:100%;max-width:900px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.06);overflow:hidden}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--ring)}
+    .title{font-size:20px;font-weight:700}
+    .chat{height:min(60vh,560px);overflow:auto;padding:18px;display:flex;gap:14px;flex-direction:column;scroll-behavior:smooth;background:#fafbff}
+    .row{display:flex;gap:10px;align-items:flex-end}
+    .row.user{justify-content:flex-end}
+    .row.bot{justify-content:flex-start}
+    .avatar{width:34px;height:34px;border-radius:50%;flex:0 0 34px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;background:#0b57d0}
+    .row.bot .avatar{background:#64748b}
+    .bubble{max-width:72%;padding:12px 14px;border-radius:16px;line-height:1.55;word-break:break-word;white-space:pre-wrap;border:1px solid var(--ring);box-shadow:0 2px 6px rgba(0,0,0,.05)}
+    .row.user .bubble{background:var(--brand);color:#fff;border-color:transparent}
+    .row.bot .bubble{background:var(--bot)}
+    .footer{padding:14px 18px;border-top:1px solid var(--ring);display:flex;gap:10px;align-items:center}
+    .muted{font-size:14px;color:var(--muted)}
+    .dots{display:inline-flex;gap:6px;align-items:center}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.35;animation:blink 1.2s infinite}
+    .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+    @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+    button,input{font-family:inherit}
+    .btn{appearance:none;border:1px solid var(--ring);background:var(--brand);color:#fff;padding:10px 14px;font-weight:700;font-size:16px;border-radius:12px;cursor:pointer}
+    .btn[disabled]{opacity:.6;cursor:not-allowed;pointer-events:none}
+    .row-input{display:flex;gap:10px;width:100%}
+    .txt{flex:1;padding:12px;border:1px solid var(--ring);border-radius:12px;font-size:16px}
+    audio{display:none}
+    body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card">
+      <div class="header">
+        <div class="title" id="title">독감 예방 백신 챗봇</div>
+        <button id="speak" class="btn" style="display:none">눌러서 말하기</button>
+      </div>
+      <div id="chat" class="chat" aria-live="polite" aria-label="대화 내용"></div>
+      <div class="footer" id="textControls" style="display:none">
+        <div class="row-input">
+          <input class="txt" id="userInput" placeholder="메시지를 입력하세요." autocomplete="off" />
+          <button class="btn" id="sendBtn">보내기</button>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="muted" id="tip">Tip: “다음”이라고 말하거나 입력해 보세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="botAudio"></audio>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const cond = (params.get('cond') || 'text').toLowerCase();
+    const pid = params.get('pid') || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+
+    // 1) api 파라미터 > 2) 같은 출처 > 3) Render 기본값
+    const DEFAULT_RENDER = 'https://<render-app>.onrender.com'; // ← 실제 주소로 교체
+    const API_BASE = (params.get('api') || (location.origin.startsWith('http') ? location.origin : DEFAULT_RENDER)).replace(/\/$/, '');
+
+    const chat = document.getElementById('chat');
+    const title = document.getElementById('title');
+    const tip = document.getElementById('tip');
+    const speakBtn = document.getElementById('speak');
+    const botAudio = document.getElementById('botAudio');
+    const textControls = document.getElementById('textControls');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+// 🔒 음성(TTS) 재생 중에는 모든 입력 잠금, 끝나면 해제
+botAudio.addEventListener('play', () => {
+  if (cond === 'voice' && speakBtn) speakBtn.disabled = true; // 눌러서 말하기 잠금
+  if (sendBtn) sendBtn.disabled = true;    // (텍스트 UI가 보이는 경우 대비)
+  if (userInput) userInput.disabled = true;
+});
+
+const unlockAfterAudio = () => {
+  if (isEnded) return;
+  if (cond === 'voice' && speakBtn) speakBtn.disabled = false; // 보이스 버튼 해제
+
+  // 텍스트 UI가 열려있는 경우에만 복구
+  if (textControls && textControls.style.display !== 'none') {
+    if (sendBtn) sendBtn.disabled = false;
+    if (userInput) userInput.disabled = false;
+  }
+};
+botAudio.addEventListener('ended', unlockAfterAudio);
+botAudio.addEventListener('error', unlockAfterAudio);
+
+
+    let isEnded = false;
+    let recHandle = null;
+
+    // 모드별 초기 UI
+    if (cond === 'voice') {
+  document.body.classList.add('voice');
+  title.textContent = '독감 예방 접종에 대해 물어보세요! (예: 접종 효과, 안전성, 필요성)';
+  speakBtn.style.display = 'inline-block';
+  textControls.style.display = 'none';
+  tip.style.display = 'block'; // ← 보이도록 유지
+  tip.textContent = 'Tip: "눌러서 말하기" 버튼을 누른 다음 말씀하세요.';
+} else {
+      title.textContent = '독감 예방 접종에 대해 물어보세요! (예: 접종 효과, 안전성, 필요성)';
+      speakBtn.style.display = 'none';
+      textControls.style.display = 'flex';
+      tip.textContent = 'Tip: 입력창에 질문을 적고 “보내기” 버튼을 누르세요.';
+    }
+
+    // 채팅 말풍선 유틸(텍스트 모드에서만 시각적으로 보임)
+    function addMsg(role, text, asThinking=false){
+      const row = document.createElement('div');
+      row.className = `row ${role}`;
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.textContent = role === 'user' ? '유저' : '챗봇';
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      if(asThinking){
+        const wrap = document.createElement('div');
+        wrap.className = 'dots';
+        wrap.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        bubble.appendChild(wrap);
+      }else{
+        bubble.textContent = text;
+      }
+      if(role === 'bot'){ row.appendChild(avatar); row.appendChild(bubble); }
+      else { row.appendChild(bubble); row.appendChild(avatar); }
+      chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
+      return {row,bubble};
+    }
+    const updateThinking = (el,text) => { if(el) el.textContent = text; };
+
+    // 텍스트 모드 전송
+    async function sendText(){
+      if (isEnded) return;
+      const text = userInput.value.trim(); if(!text) return;
+      userInput.value = '';
+      addMsg('user', text);
+      const thinking = addMsg('bot','',true);
+      try{
+        const t0 = performance.now();
+        const r = await fetch(`${API_BASE}/query`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ text, lang:'ko', cond, pid })
+        });
+        const data = await r.json();
+        const reply = data.reply || '(응답 없음)';
+        updateThinking(thinking.bubble, reply);
+
+        if (cond === 'voice' && data.audio) {
+          botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+          try { await botAudio.play(); } catch(_){}
+        }
+
+        window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
+      }catch(e){
+        updateThinking(thinking.bubble,'오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
+      }
+    }
+
+    // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
+    async function startRecognize(){
+      if (isEnded) return;
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
+
+      const rec = new SR();
+      recHandle = rec;
+      rec.lang = 'ko-KR';
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.continuous = false; // 단발
+
+      // 클릭 즉시 버튼 잠금
+      speakBtn.disabled = true;
+
+      // 해제 보장 (중복 방지 + 오디오 재생 중엔 금지)
+      let unlocked = false;
+      let gotResult = false;
+      let isPlaying = false;
+      const unlock = () => {
+        if (unlocked || isEnded) return;
+        if (isPlaying) return;
+        unlocked = true;
+        speakBtn.disabled = false;
+      };
+
+      try { rec.start(); } catch(_) { unlock(); return; }
+
+      rec.onresult = async (e) => {
+        if (isEnded) { unlock(); return; }
+        gotResult = true;
+        const text = e.results[0][0].transcript;
+
+        try{
+          const t0 = performance.now();
+          const r = await fetch(`${API_BASE}/query`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ text, lang:'ko', cond, pid })
+          });
+          const data = await r.json();
+          const reply = data.reply || '(응답 없음)';
+
+          // (보이스 모드에선 말풍선 출력 안 함)
+
+          if (data.audio){
+            isPlaying = true;
+            botAudio.onended = () => { isPlaying = false; unlock(); };
+            botAudio.onerror = () => { isPlaying = false; unlock(); };
+            botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+            try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
+          } else {
+            unlock();
+          }
+
+          window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
+        } catch(_){
+          unlock();
+        }
+      };
+
+      rec.onend   = () => { if (!isEnded && !gotResult) unlock(); else if (!isEnded && !isPlaying) unlock(); };
+      rec.onerror = () => { if (!isEnded) unlock(); };
+    }
+
+    // 이벤트
+    if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
+    else {
+      sendBtn.addEventListener('click', sendText);
+      userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendText(); });
+      addMsg('bot','아래에 메시지를 입력해 주세요.');
+    }
+
+    // 3분 타이머: 보이스는 오디오만, 텍스트는 말풍선
+    setTimeout(async () => {
+      if (isEnded) return;
+      isEnded = true;
+
+      try { recHandle?.abort?.(); } catch(_) {}
+
+      if (cond === 'voice') {
+        try {
+          const r = await fetch(`${API_BASE}/end-audio`);
+          const data = await r.json();
+          if (data.audio) {
+            botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+            try { await botAudio.play(); } catch(_) {}
+          }
+        } catch(_) {}
+      } else {
+        const thinking = addMsg('bot','',true);
+        updateThinking(thinking.bubble, '대화 시간이 끝났어요. 대화를 종료하고 이어서 설문에 답변해 주세요. 감사합니다!');
+      }
+
+      if (userInput) userInput.disabled = true;
+      if (sendBtn) sendBtn.disabled = true;
+      if (speakBtn) speakBtn.disabled = true;
+    }, 180000);
+  </script>
+</body>
+</html>
