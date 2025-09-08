@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<script>
+  // 쿼리스트링/해시 그대로 보존하면서 chat.html로 이동
+  location.replace('chat.html' + (location.search || '') + (location.hash || ''));
+</script>
