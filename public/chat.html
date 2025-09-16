@@ -78,28 +78,21 @@
   background: #b91c1c; /* hover 시 더 어두운 빨강 */
 }
 
-.row-input {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;            /* ✅ 넘침 방지 */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', system-ui, Segoe UI, Roboto, Apple SD Gothic Neo, sans-serif;
+  min-height: 100vh;   /* 기본값: 옛날 브라우저용 */
+  display: block;
+  padding: 40px 16px;  /* 위아래 40px, 좌우 16px 여백 */
   box-sizing: border-box;
-  margin-top: 12px;        /* ✅ 위쪽 여백 추가 */
 }
 
-.row-input .txt {
-  flex: 1 1 auto;          /* ✅ 입력창이 버튼 남은 공간 빼고 꽉 차도록 */
-  min-width: 0;            /* ✅ 모바일에서 옆으로 밀려나지 않게 */
-}
-
-.row-input .btn {
-  flex: 0 0 auto;          /* ✅ 버튼은 크기 고정 */
-}
-
-/* ✅ 모바일 전용 위쪽 여백 보정 */
-@media (max-width: 768px) {
+/* 최신 브라우저에서만 dvh 사용 */
+@supports (height: 100dvh) {
   body {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 40px);
+    min-height: 100dvh;
   }
 }
 
@@ -406,6 +399,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
