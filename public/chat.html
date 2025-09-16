@@ -83,18 +83,30 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Noto Sans KR', system-ui, Segoe UI, Roboto, Apple SD Gothic Neo, sans-serif;
-  min-height: 100vh;   /* 기본값: 옛날 브라우저용 */
+  min-height: 100vh;   /* 기본: 옛날 브라우저용 */
   display: block;
   padding: 40px 16px;  /* 위아래 40px, 좌우 16px 여백 */
   box-sizing: border-box;
+
+  overflow-x: hidden;  /* ✅ 가로 잘림/밀림 방지 */
 }
 
-/* 최신 브라우저에서만 dvh 사용 */
 @supports (height: 100dvh) {
   body {
-    min-height: 100dvh;
+    min-height: 100dvh; /* ✅ 최신 브라우저: 동적 뷰포트 반영 */
   }
 }
+
+/* ✅ 컨테이너도 강제로 가로 넘침 방지 */
+.shell, .card, .row-input {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.row-input .txt {
+  flex: 1 1 auto;
+  min-width: 0; /* 입력창이 버튼 밀어내지 않게 */
+}
+
 
   </style>
 </head>
@@ -399,6 +411,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
