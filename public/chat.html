@@ -78,29 +78,24 @@
   background: #b91c1c; /* hover 시 더 어두운 빨강 */
 }
 
-    /* PC/모바일 모두 대응 */
-body {
+   body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: 'Noto Sans KR', system-ui, Segoe UI, Roboto, Apple SD Gothic Neo, sans-serif;
   min-height: 100vh;
   display: flex;
-  justify-content: center;  /* 가로 가운데 정렬 */
+  justify-content: center;  /* 가로 가운데만 */
   padding: 16px;
 }
 
 .shell {
   width: 100%;
   max-width: 900px;
-  margin-top: 24px; /* PC에서 카드가 너무 위에 붙지 않도록 */
+  margin-top: 40px; /* 항상 위 여백 확보 (PC/모바일 공통) */
+  margin-bottom: 40px; /* 하단도 여유 두면 스크롤 안정적 */
 }
 
-@media (max-width: 600px) {
-  .shell {
-    margin-top: 0; /* 모바일에서는 위쪽 여백 제거 */
-  }
-}
 
   </style>
 </head>
@@ -405,6 +400,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
