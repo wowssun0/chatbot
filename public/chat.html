@@ -66,6 +66,20 @@
       <div class="footer">
         <div class="muted" id="tip">Tip: “다음”이라고 말하거나 입력해 보세요.</div>
       </div>
+      <div class="footer">
+  <div class="muted" id="tip">Tip: “다음”이라고 말하거나 입력해 보세요.</div>
+</div>
+
+<!-- ▼ 여기 코드 박스 추가 -->
+<div class="footer" id="codeBox" style="display:none; justify-content:space-between">
+  <div class="muted">본인 확인 코드: <strong id="codeText"></strong></div>
+  <button class="btn" id="copyCode">코드 복사</button>
+</div>
+<!-- ▲ 여기까지 -->
+
+</div> <!-- card 닫힘 -->
+</div> <!-- shell 닫힘 -->
+
     </div>
   </div>
 
@@ -88,6 +102,13 @@
     const textControls = document.getElementById('textControls');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    // 세션용 4자리 코드(간단 버전) — 6자리로 원하면 *1000000, padStart(6,'0')로 변경
+const surveyCode = String(Math.floor(Math.random()*10000)).padStart(4,'0');
+
+const codeBox  = document.getElementById('codeBox');
+const codeText = document.getElementById('codeText');
+const copyCode = document.getElementById('copyCode');
+
 
     // ===== 2분 카운트다운 표시만 추가 =====
 const COUNTDOWN_MS = 120000; // 2분
@@ -191,7 +212,7 @@ botAudio.addEventListener('error', unlockAfterAudio);
         const r = await fetch(`${API_BASE}/query`, {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ text, lang:'ko', cond, pid })
+          body:JSON.stringify({ text, lang:'ko', cond, pid, code: surveyCode })
         });
         const data = await r.json();
         const reply = data.reply || '(응답 없음)';
@@ -301,15 +322,30 @@ botAudio.addEventListener('error', unlockAfterAudio);
       } else {
         const thinking = addMsg('bot','',true);
         updateThinking(thinking.bubble, '대화 시간이 끝났어요. 대화를 종료하고 이어서 설문에 답변해 주세요. 감사합니다!');
+        // 안내 말풍선은 그대로 두고, 화면에 별도 코드 박스 표시
+if (codeBox && codeText) {
+  codeText.textContent = surveyCode;
+  codeBox.style.display = 'flex';
+  try { await navigator.clipboard.writeText(surveyCode); } catch(_) {} // (선택) 자동 복사
+}
       }
 
       if (userInput) userInput.disabled = true;
       if (sendBtn) sendBtn.disabled = true;
       if (speakBtn) speakBtn.disabled = true;
     }, 120000);
+    copyCode?.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(surveyCode);
+    copyCode.textContent = '복사됨!';
+    setTimeout(() => (copyCode.textContent = '코드 복사'), 1200);
+  } catch(_) {}
+});
+
   </script>
 </body>
 </html>
+
 
 
 
