@@ -100,16 +100,11 @@
       </div>
 
 <!-- ▼ 여기 코드 박스 수정 -->
-<div class="footer" id="codeBox" style="display:none; flex-direction:column; gap:6px">
+<div class="footer" id="codeBox" style="display:none; justify-content:space-between; align-items:center">
   <div class="muted">
-    대화가 끝나면 설문으로 돌아가 이 코드를 입력해 주세요.
+    본인 확인 코드: <strong id="codeText"></strong> (대화 종료 후 설문에서 입력)
   </div>
-  <div style="display:flex; align-items:center; justify-content:space-between; width:100%">
-    <div class="muted">
-      본인 확인 코드: <strong id="codeText"></strong>
-    </div>
-    <button class="btn" id="copyCode">코드 복사</button>
-  </div>
+  <button class="btn" id="copyCode">코드 복사</button>
 </div>
 
 <!-- ▲ 여기까지 -->
@@ -386,6 +381,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
