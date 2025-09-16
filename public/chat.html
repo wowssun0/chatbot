@@ -46,6 +46,38 @@
 
     audio{display:none}
     body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
+    #codeBox {
+  display: none; 
+  justify-content: space-between; 
+  align-items: center;
+  padding: 14px 18px;
+  border-top: 2px solid var(--ring);
+  background: #fff5f5; /* 은은한 분홍 배경 */
+}
+
+#codeText {
+  font-size: 32px;    /* 큼직하게 */
+  font-weight: 900;
+  color: #dc2626;     /* 진한 빨강 */
+  letter-spacing: 2px;
+}
+
+#copyCode {
+  appearance: none;
+  border: none;
+  background: #dc2626;  /* 빨간 버튼 */
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+#copyCode:hover {
+  background: #b91c1c; /* hover 시 더 어두운 빨강 */
+}
+
   </style>
 </head>
 <body>
@@ -104,6 +136,10 @@ const surveyCode = String(Math.floor(Math.random()*10000)).padStart(4,'0');
 
 const codeBox  = document.getElementById('codeBox');
 const codeText = document.getElementById('codeText');
+    if (codeBox && codeText) {
+  codeText.textContent = surveyCode;
+  codeBox.style.display = 'flex';
+}
 const copyCode = document.getElementById('copyCode');
 
 
@@ -342,6 +378,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
