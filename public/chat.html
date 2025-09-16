@@ -415,7 +415,7 @@ botAudio.addEventListener('error', unlockAfterAudio);
         } catch(_) {}
       } else {
         const thinking = addMsg('bot','',true);
-        updateThinking(thinking.bubble, '대화 시간이 끝났어요. 설문으로 돌아가 아래 본인확인코드를 입력하고 이어서 설문에 답변해 주세요. 감사합니다!');
+        updateThinking(thinking.bubble, '대화 시간이 끝났어요. 설문으로 돌아가 아래 본인확인코드를 입력하고 이어서 응답해 주세요. 감사합니다!');
         // 안내 말풍선은 그대로 두고, 화면에 별도 코드 박스 표시
 if (codeBox && codeText) {
   codeText.textContent = surveyCode;
@@ -439,6 +439,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
