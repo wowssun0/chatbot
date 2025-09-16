@@ -33,14 +33,17 @@
     .btn[disabled]{opacity:.6;cursor:not-allowed;pointer-events:none}
     .row-input{display:flex;gap:10px;width:100%}
     .txt{flex:1;padding:12px;border:1px solid var(--ring);border-radius:12px;font-size:16px}
-    .timer{
-      font-size:24px;   /* 글자 크기 크게 */
-      font-weight:700;
-      padding:8px 14px; /* 안쪽 여백도 조금 늘려주면 더 보기 좋아요 */
-      border:1px solid var(--ring);
-      border-radius:12px;
-      background:#fff;
-    }
+.timer {
+  font-size: 28px;      /* 글자 크기 크게 */
+  font-weight: 700;
+  padding: 8px 16px;    /* 안쪽 여백 넉넉히 */
+  border: 2px solid var(--ring);
+  border-radius: 12px;
+  background: #fff;
+  color: #0b57d0;       /* 기본은 파란색 */
+  transition: color 0.3s ease;
+}
+
     audio{display:none}
     body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
   </style>
@@ -87,17 +90,31 @@
     const sendBtn = document.getElementById('sendBtn');
 
     // ===== 2분 카운트다운 표시만 추가 =====
-    const COUNTDOWN_MS = 120000; // 2분(종료 타이머와 동일)
-    const startTs = Date.now();
-    const countdownEl = document.getElementById('countdown');
+const COUNTDOWN_MS = 120000; // 2분
+const startTs = Date.now();
+const countdownEl = document.getElementById('countdown');
 
-    const tick = setInterval(() => {
-      const remain = Math.max(0, COUNTDOWN_MS - (Date.now() - startTs));
-      const mm = String(Math.floor(remain / 60000)).padStart(2, '0');
-      const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, '0');
-      if (countdownEl) countdownEl.textContent = `${mm}:${ss}`;
-      if (remain === 0) clearInterval(tick);
-    }, 250);
+const tick = setInterval(() => {
+  const remain = Math.max(0, COUNTDOWN_MS - (Date.now() - startTs));
+  const mm = String(Math.floor(remain / 60000)).padStart(2, '0');
+  const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, '0');
+
+  if (countdownEl) {
+    countdownEl.textContent = `${mm}:${ss}`;
+
+    // 색상 변화 로직
+    if (remain <= 30000) {
+      countdownEl.style.color = '#dc2626'; // 30초 이하 → 빨강
+    } else if (remain <= 60000) {
+      countdownEl.style.color = '#d97706'; // 1분 이하 → 주황
+    } else {
+      countdownEl.style.color = '#0b57d0'; // 기본 파랑
+    }
+  }
+
+  if (remain === 0) clearInterval(tick);
+}, 250);
+
 
 // 🔒 음성(TTS) 재생 중에는 모든 입력 잠금, 끝나면 해제
 botAudio.addEventListener('play', () => {
@@ -293,5 +310,6 @@ botAudio.addEventListener('error', unlockAfterAudio);
   </script>
 </body>
 </html>
+
 
 
