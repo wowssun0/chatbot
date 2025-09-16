@@ -38,7 +38,7 @@ const ttsClient = useLocalKey
   : new textToSpeech.TextToSpeechClient();
 
 const LEDA_VOICE = process.env.TTS_VOICE_NAME || 'ko-KR-Chirp3-HD-Leda';
-const END_TEXT = process.env.END_TEXT || '대화 시간이 끝났어요. 설문으로 돌아가 아래 본인확인코드를 입력하고 이어서 답변해 주세요. 감사합니다!';
+const END_TEXT = process.env.END_TEXT || '대화 시간이 끝났어요. 설문으로 돌아가 아래 본인확인코드를 입력하고 이어서 설문에 답변해 주세요. 감사합니다!';
 
 const auth = useLocalKey
   ? new google.auth.GoogleAuth({ keyFile: keyPath, scopes: ['https://www.googleapis.com/auth/spreadsheets'] })
@@ -125,4 +125,5 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
