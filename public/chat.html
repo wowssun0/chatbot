@@ -78,21 +78,27 @@
   background: #b91c1c; /* hover 시 더 어두운 빨강 */
 }
 
-.row-input {
-  display: flex;
-  gap: 10px;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;               /* ✅ 모바일 브라우저 대응 */
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', system-ui, Segoe UI, Roboto, Apple SD Gothic Neo, sans-serif;
+  min-height: 100%;           /* ✅ vh 대신 100% */
+  display: block;             /* ✅ 스크롤 허용 */
+  padding: 0 16px;            /* 좌우 여백 */
+  overflow-y: auto;           /* ✅ 세로 스크롤 강제 */
+}
+
+.shell {
   width: 100%;
-  min-width: 0;            /* ✅ 넘침 방지 */
-  box-sizing: border-box;
-}
-
-.row-input .txt {
-  flex: 1 1 auto;          /* ✅ 입력창이 버튼 남은 공간 빼고 꽉 차도록 */
-  min-width: 0;            /* ✅ 모바일에서 옆으로 밀려나지 않게 */
-}
-
-.row-input .btn {
-  flex: 0 0 auto;          /* ✅ 버튼은 크기 고정 */
+  max-width: 900px;
+  margin: 40px auto;          /* 위아래 여백 보장 + 가운데 정렬 */
+  padding-bottom: 40px;       /* 카드가 긴 경우 아래 붙는 것 방지 */
 }
 
 
@@ -400,6 +406,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
