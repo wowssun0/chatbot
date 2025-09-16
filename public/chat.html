@@ -33,6 +33,11 @@
     .btn[disabled]{opacity:.6;cursor:not-allowed;pointer-events:none}
     .row-input{display:flex;gap:10px;width:100%}
     .txt{flex:1;padding:12px;border:1px solid var(--ring);border-radius:12px;font-size:16px}
+    .timer{
+      font-size:14px;font-weight:700;
+      padding:6px 10px;border:1px solid var(--ring);
+      border-radius:10px;background:#fff;
+    }
     audio{display:none}
     body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
   </style>
@@ -42,6 +47,7 @@
     <div class="card">
       <div class="header">
         <div class="title" id="title">독감 예방 백신 챗봇</div>
+        <div id="countdown" class="timer" aria-live="polite">02:00</div>
         <button id="speak" class="btn" style="display:none">눌러서 말하기</button>
       </div>
       <div id="chat" class="chat" aria-live="polite" aria-label="대화 내용"></div>
@@ -76,6 +82,19 @@
     const textControls = document.getElementById('textControls');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+
+    // ===== 2분 카운트다운 표시만 추가 =====
+    const COUNTDOWN_MS = 120000; // 2분(종료 타이머와 동일)
+    const startTs = Date.now();
+    const countdownEl = document.getElementById('countdown');
+
+    const tick = setInterval(() => {
+      const remain = Math.max(0, COUNTDOWN_MS - (Date.now() - startTs));
+      const mm = String(Math.floor(remain / 60000)).padStart(2, '0');
+      const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, '0');
+      if (countdownEl) countdownEl.textContent = `${mm}:${ss}`;
+      if (remain === 0) clearInterval(tick);
+    }, 250);
 
 // 🔒 음성(TTS) 재생 중에는 모든 입력 잠금, 끝나면 해제
 botAudio.addEventListener('play', () => {
@@ -267,7 +286,8 @@ botAudio.addEventListener('error', unlockAfterAudio);
       if (userInput) userInput.disabled = true;
       if (sendBtn) sendBtn.disabled = true;
       if (speakBtn) speakBtn.disabled = true;
-    }, 180000);
+    }, 120000);
   </script>
 </body>
 </html>
+
