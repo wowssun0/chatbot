@@ -34,9 +34,12 @@
     .row-input{display:flex;gap:10px;width:100%}
     .txt{flex:1;padding:12px;border:1px solid var(--ring);border-radius:12px;font-size:16px}
     .timer{
-      font-size:14px;font-weight:700;
-      padding:6px 10px;border:1px solid var(--ring);
-      border-radius:10px;background:#fff;
+      font-size:24px;   /* 글자 크기 크게 */
+      font-weight:700;
+      padding:8px 14px; /* 안쪽 여백도 조금 늘려주면 더 보기 좋아요 */
+      border:1px solid var(--ring);
+      border-radius:12px;
+      background:#fff;
     }
     audio{display:none}
     body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
@@ -290,4 +293,5 @@ botAudio.addEventListener('error', unlockAfterAudio);
   </script>
 </body>
 </html>
+
 
