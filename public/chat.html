@@ -106,8 +106,20 @@ body {
   flex: 1 1 auto;
   min-width: 0; /* 입력창이 버튼 밀어내지 않게 */
 }
-
-
+    
+  .guide-box {
+    background: #fefce8;        /* 연한 노랑 배경 */
+    border: 1px solid #facc15;  /* 진한 노랑 테두리 */
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 12px 18px;          /* 상단/좌우 여백 */
+    font-size: 15px;
+    line-height: 1.5;
+    color: #1f2937;             /* 글자 진한 회색 */
+  }
+  .guide-box strong {
+    color: #b45309;             /* 키워드 강조 색상 */
+  }
   </style>
 </head>
 <body>
@@ -118,6 +130,21 @@ body {
         <div id="countdown" class="timer" aria-live="polite">02:00</div>
         <button id="speak" class="btn" style="display:none">눌러서 말하기</button>
       </div>
+      <div class="guide-box">
+  <p><strong>대화 규칙</strong></p>
+  <ul style="margin: 6px 0 10px 18px; padding: 0;">
+    <li>3가지 키워드에 대해 1번 이상 질문해 주세요.</li>
+    <li>한 번에 하나씩 질문해 주세요.</li>
+    <li>3분 뒤 대화가 자동 종료됩니다.</li>
+  </ul>
+  <p><strong>질문 예시</strong></p>
+  <ul style="margin: 6px 0 0 18px; padding: 0;">
+    <li>첫 대화: “안녕!”, “반가워!”</li>
+    <li>접종 효과: "효과가 있나요?", "예방 효과가 있나요?"</li>
+    <li>안전성: "안전한가요?", "누구나 맞아도 되나요?"</li>
+    <li>필요성: "접종이 필요한가요?", "꼭 맞아야 하나요?"</li>
+  </ul>
+</div>
       <div id="chat" class="chat" aria-live="polite" aria-label="대화 내용"></div>
       <div class="footer" id="textControls" style="display:none">
         <div class="row-input">
@@ -411,6 +438,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
