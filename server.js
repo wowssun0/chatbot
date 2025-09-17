@@ -77,14 +77,14 @@ const sttClient = useLocalKey
 app.post('/stt', upload.single('file'), async (req, res) => {
   try {
     const audioBytes = req.file.buffer.toString('base64');
-    const [response] = await sttClient.recognize({
-      audio: { content: audioBytes },
-      config: {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'ko-KR'
-      }
-    });
+   const [response] = await sttClient.recognize({
+  audio: { content: audioBytes },
+  config: {
+    encoding: 'WEBM_OPUS',
+    languageCode: 'ko-KR',
+    enableAutomaticPunctuation: true
+  }
+});
 
     const transcription = response.results
       .map(r => r.alternatives[0].transcript)
@@ -111,9 +111,13 @@ app.post('/query', async (req, res) => {
     const request = { session: sessionPath, queryInput: { text: { text, languageCode: lang } } };
     if (cond === 'voice') {
       request.outputAudioConfig = {
-        audioEncoding: 'OUTPUT_AUDIO_ENCODING_MP3',
-        synthesizeSpeechConfig: { voice: { name: LEDA_VOICE }, speakingRate: 1.0, pitch: 0.0 }
-      };
+  audioEncoding: 'OUTPUT_AUDIO_ENCODING_MP3',
+  synthesizeSpeechConfig: {
+    voice: { name: LEDA_VOICE, languageCode: 'ko-KR' },
+    speakingRate: 1.0,
+    pitch: 0.0
+  }
+};
     }
 
     const t0 = Date.now();
@@ -162,6 +166,7 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
 
 
