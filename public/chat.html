@@ -9,25 +9,43 @@
     :root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#667085;--brand:#0b57d0;--ring:#d0d5dd;--bot:#f2f4f7}
     *{box-sizing:border-box}html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
+/* 공통 수정 */
 .shell {
   width: 100%;
   max-width: 900px;
-  height: 100vh;              /* 화면 전체 높이 */
+  height: 100dvh;       /* ← 100vh 대신 100dvh (동적 뷰포트, 모바일 대응) */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--ring);
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.06);
-  display: flex;              /* 세로 배치 */
+  display: flex;
   flex-direction: column;
-  height: 100%;               /* 전체 채우기 */
+  height: 100%;         /* 부모 높이에 맞춤 */
   overflow: hidden;
 }
+
+/* 📱 모바일 대응 */
+@media (max-width: 768px) {
+  .shell {
+    max-width: 100%;    /* 가로 꽉 차도록 */
+    padding: 0;         /* 여백 제거 */
+  }
+
+  .chat {
+    flex: 1;
+    min-height: 0;      /* flex 스크롤 깨짐 방지 */
+    max-height: 55vh;   /* 대화창이 너무 길어지지 않게 */
+    overflow-y: auto;
+  }
+
+  .footer {
+    position: sticky;   /* ← 화면 하단 고정 */
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid var(--ring);
+  }
 
 .header {
   display: flex;
@@ -551,6 +569,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
