@@ -9,44 +9,19 @@
     :root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#667085;--brand:#0b57d0;--ring:#d0d5dd;--bot:#f2f4f7}
     *{box-sizing:border-box}html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
-/* 공통 수정 */
 .shell {
   width: 100%;
   max-width: 900px;
-  height: 100dvh;       /* ← 100vh 대신 100dvh (동적 뷰포트, 모바일 대응) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;         /* 부모 높이에 맞춤 */
+  background: var(--card);
+  border: 1px solid var(--ring);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
   overflow: hidden;
 }
 
-/* 📱 모바일 대응 */
-@media (max-width: 768px) {
-  .shell {
-    max-width: 100%;    /* 가로 꽉 차도록 */
-    padding: 0;         /* 여백 제거 */
-  }
-
-  .chat {
-    flex: 1;
-    min-height: 0;      /* flex 스크롤 깨짐 방지 */
-    max-height: 55vh;   /* 대화창이 너무 길어지지 않게 */
-    overflow-y: auto;
-  }
-
-  .footer {
-    position: sticky;   /* ← 화면 하단 고정 */
-    bottom: 0;
-    background: #fff;
-    border-top: 1px solid var(--ring);
-  }
-}
 .header {
   display: flex;
   align-items: center;
@@ -61,21 +36,14 @@
 }
 
 .chat {
-  flex-grow: 1;              /* 채팅창이 남은 공간을 채우도록 설정 */
-  overflow-y: auto;          /* 내용이 넘치면 스크롤이 자동으로 생김 */
+  height: min(60vh, 560px);
+  overflow: auto;
   padding: 18px;
   display: flex;
   gap: 14px;
   flex-direction: column;
   scroll-behavior: smooth;
   background: #fafbff;
-  max-width: 100%;   /* 카드 밖으로 안 늘어나게 */
-  box-sizing: border-box; 
-}
-    .row .bubble {
-  max-width: 72%;    /* 말풍선 최대폭 유지 */
-  word-break: break-word; 
-  white-space: pre-wrap;
 }
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
@@ -569,6 +537,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
