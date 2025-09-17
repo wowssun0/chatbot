@@ -81,6 +81,7 @@ app.post('/stt', upload.single('file'), async (req, res) => {
   audio: { content: audioBytes },
   config: {
     encoding: 'WEBM_OPUS',
+    sampleRateHertz: 48000, 
     languageCode: 'ko-KR',
     enableAutomaticPunctuation: true
   }
@@ -161,6 +162,7 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
 
 
