@@ -303,11 +303,13 @@ botAudio.addEventListener('error', unlockAfterAudio);
       const thinking = addMsg('bot','',true);
       try{
         const t0 = performance.now();
-        const r = await fetch(`${API_BASE}/query`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ text, lang:'ko', cond, pid, code: surveyCode })
-        });
+       // 2️⃣ 변환된 텍스트를 /query 로 전달
+const r = await fetch(`${API_BASE}/query`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ text, lang: 'ko', cond: 'voice', pid }) // 🔑 voice로 고정
+});
+
         const data = await r.json();
         const reply = data.reply || '(응답 없음)';
         // detectIntent 응답 받자마자
@@ -446,6 +448,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
