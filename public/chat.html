@@ -367,35 +367,32 @@ async function startRecognize() {
   if (isEnded) return;
 
   try {
-    // 👉 질문할 때마다 새 stream 요청
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
     let chunks = [];
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
-mediaRecorder.onstop = async () => {
-  const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
-  chunks = [];
-  stream.getTracks().forEach(t => t.stop());
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
+      chunks = [];
+      stream.getTracks().forEach(t => t.stop());
 
-  const formData = new FormData();
-  formData.append('file', blob, 'voice.webm');
+      const formData = new FormData();
+      formData.append('file', blob, 'voice.webm');
 
-  try {
-    // 1️⃣ STT 요청 직전에 버튼 문구 변경
-    speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
+      try {
+        // 🎯 STT 요청 직전에
+        speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
 
-    const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
-    const sttData = await sttRes.json();
-    const text = sttData.text;
-
+        const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
+        const sttData = await sttRes.json();
+        const text = sttData.text;
 
         if (!text) { speakBtn.disabled = false; return; }
 
         addMsg('user', text);
 
-        // 2️⃣ 변환된 텍스트를 /query 로 전달
         const r = await fetch(`${API_BASE}/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -418,22 +415,20 @@ mediaRecorder.onstop = async () => {
         speakBtn.disabled = false;
       }
     };
-mediaRecorder.onstart = () => {
-  speakBtn.textContent = "말씀 중입니다...";
-  speakBtn.disabled = true;
-};
-    
-    mediaRecorder.start();
 
-    // 3초 뒤 자동 stop
+    // 🎯 여기 추가 — 버튼 누르자마자 문구 변경
+    speakBtn.textContent = "말씀 중입니다...";
+    speakBtn.disabled = true;
+
+    mediaRecorder.start();  // 실제 녹음 시작
     setTimeout(() => { mediaRecorder.stop(); }, 2000);
-
 
   } catch (err) {
     console.error('MediaRecorder error:', err);
     speakBtn.disabled = false;
   }
 }
+
 
 
     // 이벤트
@@ -487,6 +482,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
