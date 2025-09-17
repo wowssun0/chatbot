@@ -367,7 +367,13 @@ async function startRecognize() {
   if (isEnded) return;
 
   try {
+    // 👉 스트림 요청
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // ✅ 권한 승인 직후 바로 UI 갱신
+    speakBtn.textContent = "말씀 중입니다...";
+    speakBtn.disabled = true;
+
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
     let chunks = [];
@@ -382,14 +388,17 @@ async function startRecognize() {
       formData.append('file', blob, 'voice.webm');
 
       try {
-        // 🎯 STT 요청 직전에
         speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
 
         const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
         const sttData = await sttRes.json();
         const text = sttData.text;
 
-        if (!text) { speakBtn.disabled = false; return; }
+        if (!text) {
+          speakBtn.textContent = "여기를 누르고 말씀하세요";
+          speakBtn.disabled = false;
+          return;
+        }
 
         addMsg('user', text);
 
@@ -404,32 +413,31 @@ async function startRecognize() {
 
         if (data.audio) {
           botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-          botAudio.onended = () => { speakBtn.disabled = false; };
-          botAudio.onerror = () => { speakBtn.disabled = false; };
+          botAudio.onended = () => { 
+            speakBtn.textContent = "여기를 누르고 말씀하세요";
+            speakBtn.disabled = false; 
+          };
           try { await botAudio.play(); } catch { speakBtn.disabled = false; }
         } else {
+          speakBtn.textContent = "여기를 누르고 말씀하세요";
           speakBtn.disabled = false;
         }
       } catch (err) {
         console.error('STT/query error:', err);
+        speakBtn.textContent = "여기를 누르고 말씀하세요";
         speakBtn.disabled = false;
       }
     };
 
-    // 🎯 여기 추가 — 버튼 누르자마자 문구 변경
-    speakBtn.textContent = "말씀 중입니다...";
-    speakBtn.disabled = true;
-
-    mediaRecorder.start();  // 실제 녹음 시작
+    mediaRecorder.start();
     setTimeout(() => { mediaRecorder.stop(); }, 2000);
 
   } catch (err) {
     console.error('MediaRecorder error:', err);
+    speakBtn.textContent = "여기를 누르고 말씀하세요";
     speakBtn.disabled = false;
   }
 }
-
-
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -482,6 +490,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
