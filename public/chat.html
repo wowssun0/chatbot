@@ -336,9 +336,9 @@ async function startRecognize() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
 
-  // 이전 인스턴스 정리
+  // 이전 인스턴스 강제 종료
   if (recHandle) {
-    try { recHandle.abort(); } catch(e) {}
+    try { recHandle.onresult = null; recHandle.onend = null; recHandle.onerror = null; recHandle.abort(); } catch(e) {}
     recHandle = null;
   }
 
@@ -346,9 +346,9 @@ async function startRecognize() {
   recHandle = rec;
 
   rec.lang = 'ko-KR';
-  rec.interimResults = true;   // 🔑 중간 결과도 받기
+  rec.interimResults = true;
   rec.maxAlternatives = 1;
-  rec.continuous = true;       // 🔑 말 다 끝날 때까지 유지
+  rec.continuous = false;   // 🔑 "한 문장만" 받고 끝내는 게 안정적
 
   speakBtn.disabled = true;
   let finalTranscript = '';
@@ -359,12 +359,11 @@ async function startRecognize() {
       text += e.results[i][0].transcript;
     }
 
-    // 최종 결과일 때만 서버로 전송
     if (e.results[e.results.length - 1].isFinal) {
       finalTranscript = text.trim();
       if (!finalTranscript) return;
 
-      addMsg('user', finalTranscript); // 유저 질문 표시
+      addMsg('user', finalTranscript);
 
       try {
         const r = await fetch(`${API_BASE}/query`, {
@@ -393,11 +392,12 @@ async function startRecognize() {
 
   rec.onend = () => {
     recHandle = null;
-    // 최종 결과가 없으면 버튼 바로 복구
+    // 결과가 없으면 버튼 즉시 복구
     if (!finalTranscript) speakBtn.disabled = false;
   };
 
-  rec.onerror = () => {
+  rec.onerror = (e) => {
+    console.error("SpeechRecognition error:", e.error);
     recHandle = null;
     speakBtn.disabled = false;
   };
@@ -455,6 +455,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
