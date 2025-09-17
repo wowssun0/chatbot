@@ -330,70 +330,80 @@ if (cond === 'voice' && data.audio) {
 
     // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
     // ===== 보이스 모드: 음성 인식 =====
-async function startRecognize(){
+
+async function startRecognize() {
   if (isEnded) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
+  if (!SR) { alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
 
-  // 매번 새 인스턴스 생성
+  // 이전 인스턴스 정리
+  if (recHandle) {
+    try { recHandle.abort(); } catch(e) {}
+    recHandle = null;
+  }
+
   const rec = new SR();
+  recHandle = rec;
+
   rec.lang = 'ko-KR';
-  rec.interimResults = false;
+  rec.interimResults = true;   // 🔑 중간 결과도 받기
   rec.maxAlternatives = 1;
-  rec.continuous = false;
+  rec.continuous = true;       // 🔑 말 다 끝날 때까지 유지
 
   speakBtn.disabled = true;
-
-  let gotResult = false;
+  let finalTranscript = '';
 
   rec.onresult = async (e) => {
-    gotResult = true;
-    const text = e.results[0][0].transcript;
+    let text = '';
+    for (let i = e.resultIndex; i < e.results.length; ++i) {
+      text += e.results[i][0].transcript;
+    }
 
-    // 서버로 전달
-    try {
-      const r = await fetch(`${API_BASE}/query`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ text, lang:'ko', cond, pid })
-      });
-      const data = await r.json();
+    // 최종 결과일 때만 서버로 전송
+    if (e.results[e.results.length - 1].isFinal) {
+      finalTranscript = text.trim();
+      if (!finalTranscript) return;
 
-      if (data.reply) {
-        // 텍스트는 즉시
-        addMsg('user', text);
-        addMsg('bot', data.reply);
-      }
+      addMsg('user', finalTranscript); // 유저 질문 표시
 
-      if (data.audio) {
-        botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-        botAudio.onended = () => { speakBtn.disabled = false; };
-        botAudio.onerror = () => { speakBtn.disabled = false; };
-        try { await botAudio.play(); } catch(_) { speakBtn.disabled = false; }
-      } else {
+      try {
+        const r = await fetch(`${API_BASE}/query`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ text: finalTranscript, lang:'ko', cond, pid })
+        });
+        const data = await r.json();
+
+        if (data.reply) addMsg('bot', data.reply);
+
+        if (data.audio) {
+          botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+          botAudio.onended = () => { speakBtn.disabled = false; };
+          botAudio.onerror = () => { speakBtn.disabled = false; };
+          try { await botAudio.play(); } catch(_) { speakBtn.disabled = false; }
+        } else {
+          speakBtn.disabled = false;
+        }
+      } catch(err) {
+        console.error(err);
         speakBtn.disabled = false;
       }
-
-    } catch(err) {
-      console.error(err);
-      speakBtn.disabled = false;
     }
   };
 
   rec.onend = () => {
-    if (!gotResult) {
-      // 결과가 없었으면 버튼 바로 다시 살림
-      speakBtn.disabled = false;
-    }
+    recHandle = null;
+    // 최종 결과가 없으면 버튼 바로 복구
+    if (!finalTranscript) speakBtn.disabled = false;
   };
 
   rec.onerror = () => {
+    recHandle = null;
     speakBtn.disabled = false;
   };
 
   rec.start();
 }
-
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -445,6 +455,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
