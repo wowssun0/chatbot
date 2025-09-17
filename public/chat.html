@@ -71,16 +71,28 @@
   transition: color 0.3s ease;
 }
 
-    audio{display:none}
-    body.voice .chat{display:none} /* 보이스 모드: 대화 UI 전체 숨김 */
-    #codeBox {
-  display: none; 
-  justify-content: space-between; 
+audio {
+  display: none;
+}
+
+/* 보이스 모드에서 채팅 UI를 숨기지 않음 */
+body.voice .chat {
+  display: flex;  /* 채팅 UI를 보이도록 변경 */
+  flex-direction: column;  /* 세로로 정렬 */
+  overflow-y: auto;  /* 스크롤 가능 */
+  flex-grow: 1;  /* 남은 공간을 채우게 함 */
+}
+
+/* 보이스 모드에서 코드 복사 박스는 여전히 보이도록 설정 */
+#codeBox {
+  display: flex;  /* 코드 박스를 보이도록 */
+  justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
   border-top: 2px solid var(--ring);
   background: #fff5f5; /* 은은한 분홍 배경 */
 }
+
 
 #codeText {
   font-size: 32px;    /* 큼직하게 */
@@ -517,6 +529,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
