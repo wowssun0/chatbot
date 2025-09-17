@@ -346,7 +346,7 @@ async function startRecognize() {
   recHandle = rec;
 
   rec.lang = 'ko-KR';
-  rec.interimResults = true;
+  rec.interimResults = false;
   rec.maxAlternatives = 1;
   rec.continuous = false;   // 🔑 "한 문장만" 받고 끝내는 게 안정적
 
@@ -455,6 +455,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
