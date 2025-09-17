@@ -100,7 +100,7 @@ app.post('/stt', upload.single('file'), async (req, res) => {
 
 app.post('/query', async (req, res) => {
   try {
-    const { text, lang = 'ko', cond = 'text', pid = 'anon', turn = null } = req.body;
+    const { text, lang = 'ko', cond = 'text', pid = 'anon', turn = null, code = '' } = req.body;
     if (global.isEnded) return res.json({ reply: '(대화가 종료되었습니다)', audio: null, mime: 'audio/mpeg' });
 
     const sessionPath = sessionsClient.projectAgentSessionPath(projectId, uuidv4());
@@ -162,6 +162,7 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
 
 
