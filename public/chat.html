@@ -52,8 +52,6 @@
   scroll-behavior: smooth;
   background: #fafbff;
 }
-
-
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
     .row.bot{justify-content:flex-start}
@@ -88,24 +86,17 @@ audio {
   display: none;
 }
 
-body.voice .shell {
-  padding-top: 10px; /* 여백을 원하는 크기만큼 조정, 예: 10px */
-}
-    body.voice .card {
-  height: auto; /* 자동 높이 조정 */
-  margin-top: -10px;
-}
-/* 보이스 모드에서 채팅 UI를 숨기지 않음 */
+/* 보이스 모드에서 채팅 UI를 숨기고 */
 body.voice .chat {
-  display: flex;  /* 채팅 UI를 보이도록 변경 */
-  flex-direction: column;  /* 세로로 정렬 */
-  overflow-y: auto;  /* 스크롤 가능 */
-  flex-grow: 1;  /* 남은 공간을 채우게 함 */
-   min-height: 0;
+  display: none;
 }
+
+/* 보이스 모드에서 버튼 footer를 아래 고정 */
 body.voice .footer {
-  padding-top: 0;          /* 아래 여백을 없앰 */
+  margin-top: auto; /* 여백 없앰 */
+  padding-top: 0;    /* 여백 없앰 */
 }
+
     
 /* 보이스 모드에서 코드 복사 박스는 여전히 보이도록 설정 */
 #codeBox {
@@ -553,6 +544,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
