@@ -367,15 +367,22 @@ botAudio.addEventListener('error', unlockAfterAudio);
       const data = await r.json();
       const reply = data.reply || '(응답 없음)';
 
-      if (data.audio){
-        isPlaying = true;
-        botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-        try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
-        botAudio.onended = () => { isPlaying = false; unlock(); };
-        botAudio.onerror = () => { isPlaying = false; unlock(); };
-      } else {
-        unlock();
-      }
+if (data.audio){
+  isPlaying = true;
+  botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+  try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
+  botAudio.onended = () => {
+    isPlaying = false;
+    setTimeout(unlock, 300);  // 🔑 오디오 끝난 뒤 0.3초 지연 후 버튼 다시 열기
+  };
+  botAudio.onerror = () => {
+    isPlaying = false;
+    unlock();
+  };
+} else {
+  unlock();
+}
+
 
       window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
     } catch(_){
@@ -448,6 +455,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
