@@ -206,6 +206,8 @@ body {
     const API_BASE = (params.get('api') || (location.origin.startsWith('http') ? location.origin : DEFAULT_RENDER)).replace(/\/$/, '');
 
     const chat = document.getElementById('chat');
+    const speakBtn = document.getElementById('speak');
+speakBtn.textContent = "여기를 누르고 말씀하세요";  // 1) 기본 상태
     const title = document.getElementById('title');
     const tip = document.getElementById('tip');
     const speakBtn = document.getElementById('speak');
@@ -254,6 +256,7 @@ const tick = setInterval(() => {
 
 // 🔒 음성(TTS) 재생 중에는 모든 입력 잠금, 끝나면 해제
 botAudio.addEventListener('play', () => {
+  speakBtn.textContent = "챗봇이 말하는 중이에요";
   if (cond === 'voice' && speakBtn) speakBtn.disabled = true; // 눌러서 말하기 잠금
   if (sendBtn) sendBtn.disabled = true;    // (텍스트 UI가 보이는 경우 대비)
   if (userInput) userInput.disabled = true;
@@ -269,7 +272,10 @@ const unlockAfterAudio = () => {
     if (userInput) userInput.disabled = false;
   }
 };
-botAudio.addEventListener('ended', unlockAfterAudio);
+botAudio.addEventListener('ended', () => {
+  speakBtn.textContent = "여기를 누르고 말씀하세요";
+  speakBtn.disabled = false;
+});
 botAudio.addEventListener('error', unlockAfterAudio);
 
 
@@ -322,7 +328,9 @@ botAudio.addEventListener('error', unlockAfterAudio);
       const text = userInput.value.trim(); if(!text) return;
       userInput.value = '';
       addMsg('user', text);
-      const thinking = addMsg('bot','',true);
+      const thinking = addMsg('bot', '', true);
+speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
+
       try{
         const t0 = performance.now();
        // 2️⃣ 변환된 텍스트를 /query 로 전달
@@ -408,7 +416,11 @@ async function startRecognize() {
         speakBtn.disabled = false;
       }
     };
-
+mediaRecorder.onstart = () => {
+  speakBtn.textContent = "말씀 중입니다...";
+  speakBtn.disabled = true;
+};
+    
     mediaRecorder.start();
 
     // 3초 뒤 자동 stop
@@ -434,7 +446,8 @@ async function startRecognize() {
     setTimeout(async () => {
       if (isEnded) return;
       isEnded = true;
-
+speakBtn.textContent = "대화가 종료되었습니다";
+speakBtn.disabled = true;
       try { recHandle?.abort?.(); } catch(_) {}
 
       if (cond === 'voice') {
@@ -472,6 +485,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
