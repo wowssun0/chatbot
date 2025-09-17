@@ -31,9 +31,8 @@
     .header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--ring)}
     .title{font-size:20px;font-weight:700}
 .chat {
-  flex: 1;                   /* 남는 공간을 모두 차지 */
-  min-height: 0;             /* flex 아이템의 스크롤을 활성화 */
-  overflow-y: auto;          /* 스크롤 활성화 */
+  height: 400px;               /* 채팅창 고정 높이 */
+  overflow-y: auto;            /* 내용이 넘치면 스크롤이 자동으로 생김 */
   padding: 18px;
   display: flex;
   gap: 14px;
@@ -41,6 +40,7 @@
   scroll-behavior: smooth;
   background: #fafbff;
 }
+
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
     .row.bot{justify-content:flex-start}
@@ -517,6 +517,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
