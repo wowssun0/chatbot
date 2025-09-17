@@ -370,14 +370,12 @@ botAudio.addEventListener('error', unlockAfterAudio);
           // (보이스 모드에선 말풍선 출력 안 함)
 
           if (data.audio){
-            isPlaying = true;
-            botAudio.onended = () => { isPlaying = false; unlock(); };
-            botAudio.onerror = () => { isPlaying = false; unlock(); };
-            botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-            try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
-          } else {
-            unlock();
-          }
+  isPlaying = true;
+  botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+  try { await botAudio.play(); } catch(_) { isPlaying = false; unlock(); }
+} else {
+  unlock();
+}
 
           window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
         } catch(_){
@@ -385,9 +383,22 @@ botAudio.addEventListener('error', unlockAfterAudio);
         }
       };
 
-      rec.onend   = () => { if (!isEnded && !gotResult) unlock(); else if (!isEnded && !isPlaying) unlock(); };
-      rec.onerror = () => { if (!isEnded) unlock(); };
+rec.onend = () => {
+  if (!isEnded) {
+    recHandle = null;   // 🔑 인식기 정리!
+    if (!gotResult && !isPlaying) {
+      unlock();
     }
+  }
+};
+
+rec.onerror = () => {
+  if (!isEnded) {
+    recHandle = null;   // 🔑 에러 시에도 정리
+    unlock();
+  }
+};
+
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -439,6 +450,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
