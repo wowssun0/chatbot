@@ -333,11 +333,11 @@ if (cond === 'voice' && data.audio) {
     // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
     // ===== 보이스 모드: 음성 인식 =====
 
-// ===== 보이스 모드: 서버 기반 STT =====
 async function startRecognize() {
   if (isEnded) return;
 
   try {
+    // 👉 질문할 때마다 새 stream 요청
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
@@ -345,14 +345,17 @@ async function startRecognize() {
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
     mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
       chunks = [];
+
+      // ✅ 모바일 호환: 스트림 닫아주기
+      stream.getTracks().forEach(t => t.stop());
 
       const formData = new FormData();
       formData.append('file', blob, 'voice.webm');
 
       try {
-        // 1️⃣ 서버 /stt 호출 → 텍스트 변환
+        // 1️⃣ 서버 /stt 호출
         const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
         const sttData = await sttRes.json();
         const text = sttData.text;
@@ -387,7 +390,7 @@ async function startRecognize() {
 
     mediaRecorder.start();
 
-    // 3초 녹음 후 자동 종료
+    // 3초 뒤 자동 stop
     setTimeout(() => { mediaRecorder.stop(); }, 3000);
     speakBtn.disabled = true;
 
@@ -396,7 +399,6 @@ async function startRecognize() {
     speakBtn.disabled = false;
   }
 }
-
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -448,6 +450,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
