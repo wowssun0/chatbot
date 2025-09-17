@@ -333,71 +333,53 @@ if (cond === 'voice' && data.audio) {
     // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
     // ===== 보이스 모드: 음성 인식 =====
 
+// ===== 보이스 모드: Web Speech API (빠름) =====
 async function startRecognize() {
   if (isEnded) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("이 브라우저는 음성 인식을 지원하지 않아요."); return; }
 
-  try {
-    // 👉 질문할 때마다 새 stream 요청
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+  const rec = new SR();
+  rec.lang = "ko-KR";
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
 
-    let chunks = [];
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  speakBtn.disabled = true;
 
-    mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
-      chunks = [];
+  rec.onresult = async (e) => {
+    const text = e.results[0][0].transcript.trim();
+    if (!text) { speakBtn.disabled = false; return; }
 
-      // ✅ 모바일 호환: 스트림 닫아주기
-      stream.getTracks().forEach(t => t.stop());
+    addMsg("user", text);
 
-      const formData = new FormData();
-      formData.append('file', blob, 'voice.webm');
+    try {
+      const r = await fetch(`${API_BASE}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, lang: "ko", cond, pid })
+      });
+      const data = await r.json();
 
-      try {
-        // 1️⃣ 서버 /stt 호출
-        const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
-        const sttData = await sttRes.json();
-        const text = sttData.text;
+      if (data.reply) addMsg("bot", data.reply);
 
-        if (!text) { speakBtn.disabled = false; return; }
-
-        addMsg('user', text);
-
-        // 2️⃣ 변환된 텍스트를 /query 로 전달
-        const r = await fetch(`${API_BASE}/query`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, lang: 'ko', cond, pid, code: surveyCode })
-        });
-        const data = await r.json();
-
-        if (data.reply) addMsg('bot', data.reply);
-
-        if (data.audio) {
-          botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-          botAudio.onended = () => { speakBtn.disabled = false; };
-          botAudio.onerror = () => { speakBtn.disabled = false; };
-          try { await botAudio.play(); } catch { speakBtn.disabled = false; }
-        } else {
-          speakBtn.disabled = false;
-        }
-      } catch (err) {
-        console.error('STT/query error:', err);
+      if (data.audio) {
+        botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+        botAudio.onended = () => { speakBtn.disabled = false; };
+        botAudio.onerror = () => { speakBtn.disabled = false; };
+        try { await botAudio.play(); } catch { speakBtn.disabled = false; }
+      } else {
         speakBtn.disabled = false;
       }
-    };
+    } catch (err) {
+      console.error(err);
+      speakBtn.disabled = false;
+    }
+  };
 
-    mediaRecorder.start();
+  rec.onerror = () => { speakBtn.disabled = false; };
+  rec.onend = () => { speakBtn.disabled = false; };
 
-    // 3초 뒤 자동 stop
-    setTimeout(() => { mediaRecorder.stop(); }, 3000);
-    speakBtn.disabled = true;
-
-  } catch (err) {
-    console.error('MediaRecorder error:', err);
-    speakBtn.disabled = false;
-  }
+  rec.start();
 }
 
     // 이벤트
@@ -450,4 +432,5 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
