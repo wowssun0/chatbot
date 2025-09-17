@@ -339,7 +339,7 @@ async function startRecognize() {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
 
     let chunks = [];
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
@@ -448,6 +448,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
