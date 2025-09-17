@@ -129,8 +129,6 @@ body {
       <div class="header">
         <div class="title" id="title">독감 예방 백신 챗봇</div>
         <div id="countdown" class="timer" aria-live="polite">03:00</div>
-        <button id="speak" class="btn" style="display:none">여기를 누르고 말씀하세요!</button>
-      </div>
       <div class="guide-box">
   <p><strong>대화 규칙</strong></p>
   <ul style="margin: 6px 0 10px 18px; padding: 0;">
@@ -154,8 +152,8 @@ body {
         </div>
       </div>
       <div class="footer">
-        <div class="muted" id="tip">Tip: “다음”이라고 말하거나 입력해 보세요.</div>
-      </div>
+  <button id="speak" class="btn big-speak">여기를 누르고 말씀하세요.</button>
+</div>
 
 <!-- ▼ 여기 코드 박스 수정 -->
 <div class="footer" id="codeBox" style="display:none; justify-content:space-between; align-items:center">
@@ -450,6 +448,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
