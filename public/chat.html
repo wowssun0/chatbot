@@ -362,6 +362,7 @@ async function startRecognize() {
         if (!text) { speakBtn.disabled = false; return; }
 
         addMsg('user', text);
+        const thinking = addMsg('bot', '', true); // "생각 중…" 먼저 표시
 
         // 2️⃣ 변환된 텍스트를 /query 로 전달
         const r = await fetch(`${API_BASE}/query`, {
@@ -371,7 +372,7 @@ async function startRecognize() {
         });
         const data = await r.json();
 
-        if (data.reply) addMsg('bot', data.reply);
+        if (data.reply) updateThinking(thinking.bubble, data.reply);
 
         if (data.audio) {
           botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
