@@ -325,80 +325,78 @@ botAudio.addEventListener('error', unlockAfterAudio);
 
     // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
     async function startRecognize(){
-      if (isEnded) return;
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
+  if (isEnded) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
 
-      const rec = new SR();
-      recHandle = rec;
-      rec.lang = 'ko-KR';
-      rec.interimResults = false;
-      rec.maxAlternatives = 1;
-      rec.continuous = false; // 단발
+  const rec = new SR();
+  recHandle = rec;
+  rec.lang = 'ko-KR';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.continuous = false; // 단발
 
-      // 클릭 즉시 버튼 잠금
-      speakBtn.disabled = true;
+  // 클릭 즉시 버튼 잠금
+  speakBtn.disabled = true;
 
-      // 해제 보장 (중복 방지 + 오디오 재생 중엔 금지)
-      let unlocked = false;
-      let gotResult = false;
-      let isPlaying = false;
-      const unlock = () => {
-        if (unlocked || isEnded) return;
-        if (isPlaying) return;
-        unlocked = true;
-        speakBtn.disabled = false;
-      };
+  // 해제 보장 (중복 방지 + 오디오 재생 중엔 금지)
+  let unlocked = false;
+  let gotResult = false;
+  let isPlaying = false;
+  const unlock = () => {
+    if (unlocked || isEnded) return;
+    if (isPlaying) return;
+    unlocked = true;
+    speakBtn.disabled = false;
+  };
 
-      try { rec.start(); } catch(_) { unlock(); return; }
+  try { rec.start(); } catch(_) { unlock(); return; }
 
-      rec.onresult = async (e) => {
-        if (isEnded) { unlock(); return; }
-        gotResult = true;
-        const text = e.results[0][0].transcript;
+  rec.onresult = async (e) => {
+    if (isEnded) { unlock(); return; }
+    gotResult = true;
+    const text = e.results[0][0].transcript;
 
-        try{
-          const t0 = performance.now();
-          const r = await fetch(`${API_BASE}/query`, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({ text, lang:'ko', cond, pid })
-          });
-          const data = await r.json();
-          const reply = data.reply || '(응답 없음)';
+    try{
+      const t0 = performance.now();
+      const r = await fetch(`${API_BASE}/query`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ text, lang:'ko', cond, pid })
+      });
+      const data = await r.json();
+      const reply = data.reply || '(응답 없음)';
 
-          // (보이스 모드에선 말풍선 출력 안 함)
+      if (data.audio){
+        isPlaying = true;
+        botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+        try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
+        botAudio.onended = () => { isPlaying = false; unlock(); };
+        botAudio.onerror = () => { isPlaying = false; unlock(); };
+      } else {
+        unlock();
+      }
 
-          if (data.audio){
-  isPlaying = true;
-  botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-  try { await botAudio.play(); } catch(_) { isPlaying = false; unlock(); }
-} else {
-  unlock();
-}
-
-          window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
-        } catch(_){
-          unlock();
-        }
-      };
-
-rec.onend = () => {
-  if (!isEnded) {
-    recHandle = null;   // 🔑 인식기 정리!
-    if (!gotResult && !isPlaying) {
+      window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
+    } catch(_){
       unlock();
     }
-  }
-};
+  };
 
-rec.onerror = () => {
-  if (!isEnded) {
-    recHandle = null;   // 🔑 에러 시에도 정리
-    unlock();
-  }
-};
+  rec.onend = () => {
+    if (!isEnded) {
+      recHandle = null;   // 🔑 인식기 정리
+      if (!gotResult && !isPlaying) unlock();
+    }
+  };
 
+  rec.onerror = () => {
+    if (!isEnded) {
+      recHandle = null;   // 🔑 에러 시에도 정리
+      unlock();
+    }
+  };
+} // ✅ startRecognize 함수 닫힘
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
