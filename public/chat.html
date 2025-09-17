@@ -335,55 +335,65 @@ async function startRecognize(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
 
-  // 매번 새 객체 생성
+  // 매번 새 인스턴스 생성
   const rec = new SR();
-  recHandle = rec;
   rec.lang = 'ko-KR';
   rec.interimResults = false;
   rec.maxAlternatives = 1;
-  rec.continuous = false; // 단발 인식
+  rec.continuous = false;
 
-  speakBtn.disabled = true; // 누르는 순간 잠금
+  speakBtn.disabled = true;
+
+  let gotResult = false;
 
   rec.onresult = async (e) => {
-    if (isEnded) return;
+    gotResult = true;
     const text = e.results[0][0].transcript;
 
-    try{
-      const t0 = performance.now();
+    // 서버로 전달
+    try {
       const r = await fetch(`${API_BASE}/query`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({ text, lang:'ko', cond, pid })
       });
       const data = await r.json();
-      const reply = data.reply || '(응답 없음)';
 
-      // ✅ 텍스트는 즉시 처리
-      // (보이스 모드라 말풍선은 안 쓰더라도 즉시 반영 원하면 여기서 처리)
-      console.log("챗봇 답변:", reply);
+      if (data.reply) {
+        // 텍스트는 즉시
+        addMsg('user', text);
+        addMsg('bot', data.reply);
+      }
 
-      // ✅ 음성 재생 (끝나야 버튼 풀림)
-      if (data.audio){
+      if (data.audio) {
         botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-        botAudio.onended = () => { speakBtn.disabled = false; }; // 🔑 여기서만 해제
+        botAudio.onended = () => { speakBtn.disabled = false; };
         botAudio.onerror = () => { speakBtn.disabled = false; };
         try { await botAudio.play(); } catch(_) { speakBtn.disabled = false; }
       } else {
         speakBtn.disabled = false;
       }
 
-      window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
-    } catch(_){
+    } catch(err) {
+      console.error(err);
       speakBtn.disabled = false;
     }
   };
 
-  rec.onend = () => { recHandle = null; };   // 🔑 항상 정리
-  rec.onerror = () => { recHandle = null; speakBtn.disabled = false; };
+  rec.onend = () => {
+    if (!gotResult) {
+      // 결과가 없었으면 버튼 바로 다시 살림
+      speakBtn.disabled = false;
+    }
+  };
 
-  try { rec.start(); } catch(_) { speakBtn.disabled = false; }
+  rec.onerror = () => {
+    speakBtn.disabled = false;
+  };
+
+  rec.start();
 }
+
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -435,6 +445,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
