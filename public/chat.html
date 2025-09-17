@@ -431,7 +431,8 @@ async function startRecognize() {
 
     mediaRecorder.start();
     setTimeout(() => { mediaRecorder.stop(); }, 5000);
-
+}, 500);
+  
   } catch (err) {
     console.error('MediaRecorder error:', err);
     speakBtn.textContent = "여기를 누르고 말씀하세요";
@@ -490,6 +491,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
