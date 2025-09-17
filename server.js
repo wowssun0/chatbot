@@ -97,11 +97,6 @@ app.post('/stt', upload.single('file'), async (req, res) => {
   }
 });
 
-// ⬇️ 기존 query 라우트는 그대로 둠
-app.post('/query', async (req, res) => {
-  …
-});
-
 app.post('/query', async (req, res) => {
   try {
     const { text, lang = 'ko', cond = 'text', pid = 'anon', turn = null } = req.body;
@@ -166,6 +161,7 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
 
 
