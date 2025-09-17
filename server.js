@@ -127,12 +127,13 @@ app.post('/query', async (req, res) => {
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:J`,
+        range: `${SHEET_NAME}!A:K`,
         valueInputOption: 'RAW',
         requestBody: {
           values: [[
             timestamp,
             pid,
+            code,
             cond,
             rtMs,
             turn,
@@ -162,6 +163,7 @@ app.post('/query', async (req, res) => {
 app.listen(port, () => {
   console.log(`✅ Chatbot server running on port ${port}`);
 });
+
 
 
 
