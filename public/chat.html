@@ -310,12 +310,17 @@ botAudio.addEventListener('error', unlockAfterAudio);
         });
         const data = await r.json();
         const reply = data.reply || '(응답 없음)';
-        updateThinking(thinking.bubble, reply);
+        // detectIntent 응답 받자마자
+updateThinking(thinking.bubble, reply); // ✅ 바로 표시
 
-        if (cond === 'voice' && data.audio) {
-          botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-          try { await botAudio.play(); } catch(_){}
-        }
+if (cond === 'voice' && data.audio) {
+  botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+  botAudio.onended = () => { speakBtn.disabled = false; };
+  botAudio.onerror = () => { speakBtn.disabled = false; };
+  speakBtn.disabled = true;
+  try { await botAudio.play(); } catch(_) { speakBtn.disabled = false; }
+}
+
 
         window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
       }catch(e){
@@ -324,37 +329,24 @@ botAudio.addEventListener('error', unlockAfterAudio);
     }
 
     // 보이스: 한 번 눌러 1문장 인식 → TTS 끝날 때까지 버튼 잠금
-    async function startRecognize(){
+    // ===== 보이스 모드: 음성 인식 =====
+async function startRecognize(){
   if (isEnded) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ alert('Chrome 또는 Edge 브라우저에서 사용하세요.'); return; }
 
+  // 매번 새 객체 생성
   const rec = new SR();
   recHandle = rec;
   rec.lang = 'ko-KR';
   rec.interimResults = false;
   rec.maxAlternatives = 1;
-  rec.continuous = false; // 단발
+  rec.continuous = false; // 단발 인식
 
-  // 클릭 즉시 버튼 잠금
-  speakBtn.disabled = true;
-
-  // 해제 보장 (중복 방지 + 오디오 재생 중엔 금지)
-  let unlocked = false;
-  let gotResult = false;
-  let isPlaying = false;
-  const unlock = () => {
-    if (unlocked || isEnded) return;
-    if (isPlaying) return;
-    unlocked = true;
-    speakBtn.disabled = false;
-  };
-
-  try { rec.start(); } catch(_) { unlock(); return; }
+  speakBtn.disabled = true; // 누르는 순간 잠금
 
   rec.onresult = async (e) => {
-    if (isEnded) { unlock(); return; }
-    gotResult = true;
+    if (isEnded) return;
     const text = e.results[0][0].transcript;
 
     try{
@@ -367,43 +359,31 @@ botAudio.addEventListener('error', unlockAfterAudio);
       const data = await r.json();
       const reply = data.reply || '(응답 없음)';
 
-if (data.audio){
-  isPlaying = true;
-  botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
-  try { await botAudio.play(); } catch(_){ isPlaying = false; unlock(); }
-  botAudio.onended = () => {
-    isPlaying = false;
-    setTimeout(unlock, 300);  // 🔑 오디오 끝난 뒤 0.3초 지연 후 버튼 다시 열기
-  };
-  botAudio.onerror = () => {
-    isPlaying = false;
-    unlock();
-  };
-} else {
-  unlock();
-}
+      // ✅ 텍스트는 즉시 처리
+      // (보이스 모드라 말풍선은 안 쓰더라도 즉시 반영 원하면 여기서 처리)
+      console.log("챗봇 답변:", reply);
 
+      // ✅ 음성 재생 (끝나야 버튼 풀림)
+      if (data.audio){
+        botAudio.src = `data:${data.mime || 'audio/mpeg'};base64,${data.audio}`;
+        botAudio.onended = () => { speakBtn.disabled = false; }; // 🔑 여기서만 해제
+        botAudio.onerror = () => { speakBtn.disabled = false; };
+        try { await botAudio.play(); } catch(_) { speakBtn.disabled = false; }
+      } else {
+        speakBtn.disabled = false;
+      }
 
       window.parent?.postMessage({pid,cond,rt_ms:Math.round(performance.now()-t0),user:text,bot:reply},'*');
     } catch(_){
-      unlock();
+      speakBtn.disabled = false;
     }
   };
 
-  rec.onend = () => {
-    if (!isEnded) {
-      recHandle = null;   // 🔑 인식기 정리
-      if (!gotResult && !isPlaying) unlock();
-    }
-  };
+  rec.onend = () => { recHandle = null; };   // 🔑 항상 정리
+  rec.onerror = () => { recHandle = null; speakBtn.disabled = false; };
 
-  rec.onerror = () => {
-    if (!isEnded) {
-      recHandle = null;   // 🔑 에러 시에도 정리
-      unlock();
-    }
-  };
-} // ✅ startRecognize 함수 닫힘
+  try { rec.start(); } catch(_) { speakBtn.disabled = false; }
+}
 
     // 이벤트
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
@@ -455,6 +435,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
