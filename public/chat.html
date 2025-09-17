@@ -9,10 +9,10 @@
     :root{--bg:#f6f7fb;--card:#fff;--text:#1f2430;--muted:#667085;--brand:#0b57d0;--ring:#d0d5dd;--bot:#f2f4f7}
     *{box-sizing:border-box}html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px}
-    .shell {
+.shell {
   width: 100%;
   max-width: 900px;
-  height: 100vh;              /* ✅ 화면 전체 높이 */
+  height: 100vh;              /* 화면 전체 높이 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,16 +23,28 @@
   border: 1px solid var(--ring);
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0,0,0,.06);
-  display: flex;              /* ✅ 세로 배치 */
+  display: flex;              /* 세로 배치 */
   flex-direction: column;
-  height: 100%;               /* ✅ 전체 채우기 */
+  height: 100%;               /* 전체 채우기 */
   overflow: hidden;
 }
-    .header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--ring)}
-    .title{font-size:20px;font-weight:700}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--ring);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
 .chat {
-  height: 300px;               /* 채팅창 고정 높이 */
-  overflow-y: auto;            /* 내용이 넘치면 스크롤이 자동으로 생김 */
+  flex-grow: 1;              /* 채팅창이 남은 공간을 채우도록 설정 */
+  overflow-y: auto;          /* 내용이 넘치면 스크롤이 자동으로 생김 */
   padding: 18px;
   display: flex;
   gap: 14px;
@@ -40,6 +52,7 @@
   scroll-behavior: smooth;
   background: #fafbff;
 }
+
 
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
@@ -540,6 +553,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
