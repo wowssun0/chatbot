@@ -120,7 +120,25 @@ body {
   .guide-box strong {
     color: #b45309;             /* 키워드 강조 색상 */
   }
-
+/* ✅ 여기 추가 */
+.big-speak {
+  display: block;
+  width: 100%;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: 14px;
+  background: #0b57d0;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s ease;
+}
+.big-speak:disabled {
+  background: #9bb7e0;
+  cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -448,6 +466,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
