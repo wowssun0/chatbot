@@ -54,6 +54,11 @@
   max-width: 100%;   /* 카드 밖으로 안 늘어나게 */
   box-sizing: border-box; 
 }
+    .row .bubble {
+  max-width: 72%;    /* 말풍선 최대폭 유지 */
+  word-break: break-word; 
+  white-space: pre-wrap;
+}
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
     .row.bot{justify-content:flex-start}
@@ -546,6 +551,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
