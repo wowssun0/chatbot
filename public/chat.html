@@ -374,21 +374,22 @@ async function startRecognize() {
     let chunks = [];
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
-    mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
-      chunks = [];
+mediaRecorder.onstop = async () => {
+  const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' });
+  chunks = [];
+  stream.getTracks().forEach(t => t.stop());
 
-      // ✅ 모바일 호환: 스트림 닫아주기
-      stream.getTracks().forEach(t => t.stop());
+  const formData = new FormData();
+  formData.append('file', blob, 'voice.webm');
 
-      const formData = new FormData();
-      formData.append('file', blob, 'voice.webm');
+  try {
+    // 1️⃣ STT 요청 직전에 버튼 문구 변경
+    speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
 
-      try {
-        // 1️⃣ 서버 /stt 호출
-        const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
-        const sttData = await sttRes.json();
-        const text = sttData.text;
+    const sttRes = await fetch(`${API_BASE}/stt`, { method: 'POST', body: formData });
+    const sttData = await sttRes.json();
+    const text = sttData.text;
+
 
         if (!text) { speakBtn.disabled = false; return; }
 
@@ -486,6 +487,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
