@@ -75,12 +75,13 @@ audio {
   display: none;
 }
 
-    body.voice .row-input {
-  display: none;
+body.voice .shell {
+  padding-top: 10px; /* 여백을 원하는 크기만큼 조정, 예: 10px */
 }
     body.voice .card {
   height: auto; /* 자동 높이 조정 */
-  min-height: 100%; /* 화면 전체를 채우도록 */
+  margin-top: -10px;
+      min-height: 100%; /* 화면 전체를 채우도록 */
 }
 /* 보이스 모드에서 채팅 UI를 숨기지 않음 */
 body.voice .chat {
