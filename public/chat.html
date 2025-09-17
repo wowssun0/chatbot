@@ -51,6 +51,9 @@
   flex-direction: column;
   scroll-behavior: smooth;
   background: #fafbff;
+  max-width: 100%;   /* 카드 밖으로 안 늘어나게 */
+  box-sizing: border-box; 
+}
 }
     .row{display:flex;gap:10px;align-items:flex-end}
     .row.user{justify-content:flex-end}
@@ -544,6 +547,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
