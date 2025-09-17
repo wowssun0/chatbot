@@ -390,7 +390,7 @@ async function startRecognize() {
     mediaRecorder.start();
 
     // 3초 뒤 자동 stop
-    setTimeout(() => { mediaRecorder.stop(); }, 3000);
+    setTimeout(() => { mediaRecorder.stop(); }, 1500);
     speakBtn.disabled = true;
 
   } catch (err) {
@@ -450,6 +450,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
