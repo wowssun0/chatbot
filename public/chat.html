@@ -210,7 +210,6 @@ body {
 speakBtn.textContent = "여기를 누르고 말씀하세요";  // 1) 기본 상태
     const title = document.getElementById('title');
     const tip = document.getElementById('tip');
-    const speakBtn = document.getElementById('speak');
     const botAudio = document.getElementById('botAudio');
     const textControls = document.getElementById('textControls');
     const userInput = document.getElementById('userInput');
@@ -329,7 +328,9 @@ botAudio.addEventListener('error', unlockAfterAudio);
       userInput.value = '';
       addMsg('user', text);
       const thinking = addMsg('bot', '', true);
-speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
+if (cond === 'voice') {
+  speakBtn.textContent = "챗봇이 답변을 준비하고 있어요...";
+}
 
       try{
         const t0 = performance.now();
@@ -425,7 +426,7 @@ mediaRecorder.onstart = () => {
 
     // 3초 뒤 자동 stop
     setTimeout(() => { mediaRecorder.stop(); }, 2000);
-    speakBtn.disabled = true;
+
 
   } catch (err) {
     console.error('MediaRecorder error:', err);
@@ -485,6 +486,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
