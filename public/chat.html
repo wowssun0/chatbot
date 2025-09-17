@@ -431,8 +431,7 @@ async function startRecognize() {
 
     setTimeout(() => {
     mediaRecorder.start();
-    setTimeout(() => { mediaRecorder.stop(); }, 5000);
-}, 500);
+    setTimeout(() => { mediaRecorder.stop(); }, 4500);
   
   } catch (err) {
     console.error('MediaRecorder error:', err);
@@ -492,6 +491,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
