@@ -282,14 +282,15 @@ botAudio.addEventListener('error', unlockAfterAudio);
   title.textContent = '독감 예방 접종에 대해 물어보세요! (접종 효과, 안전성, 필요성)';
   speakBtn.style.display = 'inline-block';
   textControls.style.display = 'none';
-  tip.style.display = 'block'; // ← 보이도록 유지
-  tip.textContent = 'Tip: "눌러서 말하기" 버튼을 누른 다음 말씀하세요.';
+  tip.style.display = 'none'; // ✅ 보이스 모드에서는 tip 숨김
 } else {
-      title.textContent = '독감 예방 접종에 대해 물어보세요! (접종 효과, 안전성, 필요성)';
-      speakBtn.style.display = 'none';
-      textControls.style.display = 'flex';
-      tip.textContent = 'Tip: 입력창에 질문을 적고 “보내기” 버튼을 누르세요.';
-    }
+  title.textContent = '독감 예방 접종에 대해 물어보세요! (접종 효과, 안전성, 필요성)';
+  speakBtn.style.display = 'none';
+  textControls.style.display = 'flex';
+  tip.style.display = 'block'; 
+  tip.textContent = 'Tip: 입력창에 질문을 적고 “보내기” 버튼을 누르세요.';
+}
+
 
     // 채팅 말풍선 유틸(텍스트 모드에서만 시각적으로 보임)
     function addMsg(role, text, asThinking=false){
@@ -471,6 +472,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
