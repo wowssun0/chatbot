@@ -307,7 +307,7 @@ botAudio.addEventListener('error', unlockAfterAudio);
 const r = await fetch(`${API_BASE}/query`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ text, lang: 'ko', cond: 'voice', pid }) // 🔑 voice로 고정
+  body: JSON.stringify({ text, lang: 'ko', cond: 'voice', pid, code: surveyCode }) // 🔑 voice로 고정
 });
 
         const data = await r.json();
@@ -368,7 +368,7 @@ async function startRecognize() {
         const r = await fetch(`${API_BASE}/query`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, lang: 'ko', cond, pid })
+          body: JSON.stringify({ text, lang: 'ko', cond, pid, code: surveyCode })
         });
         const data = await r.json();
 
@@ -450,3 +450,4 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
