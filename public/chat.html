@@ -490,7 +490,9 @@ async function startRecognize() {
     if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
     else {
       sendBtn.addEventListener('click', sendText);
-      userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendText(); });
+      userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') {
+         e.preventDefault();
+        sendText(); });
       addMsg('bot','아래에 메시지를 입력해 주세요.');
     }
 
@@ -537,6 +539,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
