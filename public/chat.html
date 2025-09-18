@@ -486,15 +486,20 @@ async function startRecognize() {
   }
 }
 
-    // 이벤트
-    if (cond==='voice') speakBtn.addEventListener('click', startRecognize);
-    else {
-      sendBtn.addEventListener('click', sendText);
-      userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') {
-         e.preventDefault();
-        sendText(); });
-      addMsg('bot','아래에 메시지를 입력해 주세요.');
+// 이벤트
+if (cond==='voice') {
+  speakBtn.addEventListener('click', startRecognize);
+} else {
+  sendBtn.addEventListener('click', sendText);
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();  // ✅ 기본 엔터 동작 막기
+      sendText();
     }
+  });
+  addMsg('bot','아래에 메시지를 입력해 주세요.');
+}
+
 
     // 3분 타이머: 보이스는 오디오만, 텍스트는 말풍선
     setTimeout(async () => {
@@ -539,6 +544,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
