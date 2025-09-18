@@ -385,7 +385,7 @@ if (cond === 'voice') {
 const r = await fetch(`${API_BASE}/query`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ text, lang: 'ko', cond, pid, code: surveyCode }) // 🔑 voice로 고정
+  body: JSON.stringify({ text, lang: 'ko', cond, pid, code: surveyCode }) 
 });
 
         const data = await r.json();
@@ -537,6 +537,7 @@ if (codeBox && codeText) {
   </script>
 </body>
 </html>
+
 
 
 
